@@ -23,7 +23,7 @@ def check(pas):
         return False    
 
 
-def recode(msg,nam):
+def recode(msg,nam,addr):
     path1= os.path.join(BASE,"room1\cound1.txt")
     #path2= os.path.join(BASE,"room1\cound2.txt")
     pathbox= os.path.join(BASE,"room1\chatbox.txt")
@@ -39,6 +39,7 @@ def recode(msg,nam):
 
     box= open(pathbox,'a')
     box.write(f'{data2[1:]} {msg}\n')
+    #box.write(f'[{addr}] {msg}\n')
     box.close()
     
 
@@ -91,7 +92,7 @@ def on_new_client2(clientsocket,addr,nam):
         if msg=='stop':
             break
         #do some checks and if msg == someWeirdSignal: break:
-        recode(msg,nam)
+        recode(msg,nam,addr)
         
         
         msg = input()

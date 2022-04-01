@@ -62,7 +62,7 @@ def chat():
                 c.send(bytes("text###::chat",'utf-8'))
                 
                 c.sendall(bytes(data,'utf-8'))
-                c.close()
+                
             else:
                 
                 print(" pleases login for send data ")
@@ -72,7 +72,7 @@ def chat():
             print (' error to communictuion')
 
 
-                                            ######################################
+    c.close()                                       ######################################
 ####################################################### chat Box creation ################################################################
                                             ######################################
 
@@ -100,15 +100,20 @@ def chatbox():
                     cout_file=open(cout_path,'w')
                     cout_file.write(msco)
                     cout_file.close()
-                    msgg=c.recv(2045).decode()
-                    if msgg:
+                   
+                    
+                    while True:
+                        msgg=c.recv(2045).decode()
+                        if not msgg:
+                            break
                         print(msgg)
-                    c.close()
+                    
                 else:
                     print(" pleases login for send data ")
                     break
             except:
                 print (' error to communictuion')
+        c.close()
     except KeyboardInterrupt:
         print("server stop")
         pass
@@ -126,3 +131,31 @@ if __name__=='__main__':
 
 
 
+
+
+def sendimg ():
+    c = socket.socket()
+    c.connect(('127.0.0.1',5000))
+
+    try:
+        
+        #path=input('[image path ]::> ')
+        #fimgr=open(rf'{path}','rb')
+        fimgr=open(rf'clin_file\img\birdve.mp4','rb')
+        enimg=fimgr.read()
+        fimgr.close()
+        file_name='new_file_3.mp4'
+        c.send(file_name.encode())
+        confo=c.recv(1024)
+        if confo.decode()== "sendimage":
+            
+            c.send(enimg)
+                
+            print("the image send..")
+
+    except:
+        print(" some error in image sending ")
+
+
+if __name__=='__main__':
+    app()
