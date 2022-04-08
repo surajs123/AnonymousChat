@@ -23,7 +23,7 @@ def check(pas):
         return False    
 
 
-def recode(msg,nam,addr):
+def recode(msg,nam):
     path1= os.path.join(BASE,"room1\cound1.txt")
     #path2= os.path.join(BASE,"room1\cound2.txt")
     pathbox= os.path.join(BASE,"room1\chatbox.txt")
@@ -85,14 +85,14 @@ def on_chat_box(clientsocket,cout1):
 
 
 
-def on_new_client2(clientsocket,addr,nam):
+def on_chat_client(clientsocket,addr,nam):
     
     while True:
         msg = clientsocket.recv(1024).decode()
         if msg=='stop':
             break
         #do some checks and if msg == someWeirdSignal: break:
-        recode(msg,nam,addr)
+        recode(msg,nam)
         
         
         msg = input()
@@ -100,13 +100,40 @@ def on_new_client2(clientsocket,addr,nam):
         clientsocket.send(msg)
     clientsocket.close()
 
+def on_file_receve(client,nam,che):
+    
+
+    if nam:
+        fimgw=open(rf'{BASE}\room1\images\{nam}','wb')
+        
+        
+        data1=bytes()
+        while True:
+            data = client.recv(1024)
+            if not data:
+                break
+            data1+=data
+        fimgw.write(data1)
+        mss=f'File :[ {nam} ]'
+        recode(mss,che)
+        
+
+        
+        client.close()
+    else:
+        client.close()
+
+
+
+
+
 s = socket.socket()         # Create a socket object
 #host = socket.gethostname() # Get local machine name
 host='127.0.0.1'
 port = 5000               # Reserve a port for your service.
 
 print ('Server started!')
-print ('Waiting for clients...')
+print ('Waiting for clients...',host)
 
 s.bind((host, port))        # Bind to the port
 s.listen(8)                 # Now wait for client connection.
@@ -123,11 +150,16 @@ try:
             typ=c.recv(1024).decode()
             if typ=="text###::chat":
             
-                _thread.start_new_thread(on_new_client2,(c,addr,che))
+                _thread.start_new_thread(on_chat_client,(c,addr,che))
             elif typ=="text###::chatbox":
                 cout=c.recv(1024).decode()
                 _thread.start_new_thread(on_chat_box,(c,int(cout)))
 
+            elif typ=="file###::chatfile":
+                
+                nam=c.recv(1024).decode()
+                print(nam)
+                _thread.start_new_thread(on_file_receve,(c,nam,che))
             
         else:
             c.send(bytes('false##::','utf-8)'))

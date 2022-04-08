@@ -1,10 +1,15 @@
-from ast import While
+
 import socket
 from time import sleep
 from pathlib import Path
 import os
 import re
 import typer
+import tkinter as tk
+from tkinter import filedialog
+
+
+
 app = typer.Typer()
 
                                             ######################################
@@ -26,7 +31,7 @@ def get_login():
 
 # to create the username and passwor for the login
 @app.command()
-def login(user,pas):
+def login(user:str,pas:str):
     #user=input('Username : ')
     #pas =input('Password : ')
     pathl= os.path.join(BASE,"obb\_login.txt")
@@ -72,7 +77,9 @@ def chat():
             print (' error to communictuion')
 
 
-    c.close()                                       ######################################
+    c.close() 
+    
+                                            ######################################
 ####################################################### chat Box creation ################################################################
                                             ######################################
 
@@ -113,6 +120,7 @@ def chatbox():
                     break
             except:
                 print (' error to communictuion')
+                break
         c.close()
     except KeyboardInterrupt:
         print("server stop")
@@ -120,41 +128,49 @@ def chatbox():
 
 
 
-if __name__=='__main__':
-    app()
+                                            ######################################
+####################################################### sending files ################################################################
+                                            ######################################
 
 
-
-
-
-
-
-
-
-
-
-def sendimg ():
-    c = socket.socket()
-    c.connect(('127.0.0.1',5000))
+@app.command()
+def sendfile ():
+    
 
     try:
+        root = tk.Tk()
+        root.withdraw()
+
+        path = filedialog.askopenfilename() # open a file window and send the file 
+
+        fimgr=open(rf'{path}','rb')
+        c = socket.socket()
+        c.connect(('127.0.0.1',5000))
         
-        #path=input('[image path ]::> ')
-        #fimgr=open(rf'{path}','rb')
-        fimgr=open(rf'clin_file\img\birdve.mp4','rb')
         enimg=fimgr.read()
         fimgr.close()
-        file_name='new_file_3.mp4'
-        c.send(file_name.encode())
-        confo=c.recv(1024)
-        if confo.decode()== "sendimage":
+        val=get_login()
+        c.sendall(bytes(val,'utf-8'))
+        msg1=c.recv(1024).decode()
+        if msg1=='true##::':
+            c.send(bytes("file###::chatfile",'utf-8'))
+            
+            nam= Path(path).name
+            c.send(bytes(nam,'utf-8'))
+            print("[sending] sending the file....")
             
             c.send(enimg)
                 
-            print("the image send..")
+            print("[send] file send..")
+            # to save the file in the sending client files
+
+            pathf= os.path.join(BASE,f"obb\document\{nam}")
+            filef=open(pathf,'wb')
+            filef.write(enimg)
+            filef.close()
 
     except:
-        print(" some error in image sending ")
+        print(" [ERROR ] some error in image sending ")
 
 
 if __name__=='__main__':
